@@ -63,17 +63,15 @@ public class PooledUUIDBlockingGenerator extends NoArgGenerator implements AutoC
 
     @Override
     public UUID generate() {
-        final UUID v = queue.poll();
-
-        if (v != null) {
-            return v;
-        } else {
+        try {
+            return queue.take();
+        } catch (InterruptedException e) {
             return fallback();
         }
     }
 
     private UUID fallback() {
-        // System.err.printf("FALLBACK to the delegate");
+        System.err.printf("FALLBACK to the delegate");
         return delegate.generate();
     }
 }

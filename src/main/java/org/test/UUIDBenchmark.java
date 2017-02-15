@@ -82,10 +82,10 @@ public class UUIDBenchmark {
         return pooledBlockingGenerator.generate();
     }
 
-    @Benchmark
-    public UUID testLivePooledUUID() {
-        return pooledLiveGenerator.generate();
-    }
+//    @Benchmark
+//    public UUID testLivePooledUUID() {
+//        return pooledLiveGenerator.generate();
+//    }
 
     @Benchmark
     public UUID testJavaUtilUUID() {
