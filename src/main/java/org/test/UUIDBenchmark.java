@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 @Warmup(iterations = UUIDBenchmark.ITERATION_COUNT, time = UUIDBenchmark.ITERATION_SEC, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = UUIDBenchmark.ITERATION_COUNT, time = UUIDBenchmark.ITERATION_SEC, timeUnit = TimeUnit.SECONDS)
-@Timeout(time = 2 * UUIDBenchmark.ITERATION_SEC, timeUnit = TimeUnit.SECONDS)
+@Timeout(time = 5 * UUIDBenchmark.ITERATION_SEC, timeUnit = TimeUnit.SECONDS)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 public class UUIDBenchmark {
 
