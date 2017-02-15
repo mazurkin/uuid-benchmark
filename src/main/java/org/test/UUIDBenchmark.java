@@ -10,38 +10,81 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
 
+import java.util.Random;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-@BenchmarkMode(Mode.SampleTime)
+@BenchmarkMode(Mode.Throughput)
 @Fork(1)
 @Threads(256)
 @State(Scope.Benchmark)
-@Warmup(iterations = 1, time = 60, timeUnit = TimeUnit.SECONDS)
-@Measurement(iterations = 1, time = 60, timeUnit = TimeUnit.SECONDS)
-@Timeout(time = 120, timeUnit = TimeUnit.SECONDS)
+@Warmup(iterations = UUIDBenchmark.ITERATION_COUNT, time = UUIDBenchmark.ITERATION_SEC, timeUnit = TimeUnit.SECONDS)
+@Measurement(iterations = UUIDBenchmark.ITERATION_COUNT, time = UUIDBenchmark.ITERATION_SEC, timeUnit = TimeUnit.SECONDS)
+@Timeout(time = 2 * UUIDBenchmark.ITERATION_SEC, timeUnit = TimeUnit.SECONDS)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 public class UUIDBenchmark {
 
-    private NoArgGenerator randomGenerator;
+    public static final int ITERATION_COUNT = 1;
+
+    public static final int ITERATION_SEC = 60;
+
+    private NoArgGenerator randomGenerator1;
+
+    private NoArgGenerator randomGenerator2;
 
     private NoArgGenerator timeGenerator;
 
-    public UUIDBenchmark() {
-        Logger.setLogLevel(Logger.LOG_ERROR_AND_ABOVE);
+    private PooledUUIDBlockingGenerator pooledBlockingGenerator;
 
-        this.randomGenerator = Generators.randomBasedGenerator();
+    private PooledUUIDLiveGenerator pooledLiveGenerator;
+
+    public UUIDBenchmark() {
+        // custom logger in com.fasterxml.*
+        Logger.setLogLevel(Logger.LOG_ERROR_AND_ABOVE);
+    }
+
+    @Setup(Level.Trial)
+    public void setUp() throws Exception {
+        // java.security.SecureRandom is behind the scene by default
+        this.randomGenerator1 = Generators.randomBasedGenerator();
+        // shared java.util.Random is used
+        this.randomGenerator2 = Generators.randomBasedGenerator(new Random());
+
         this.timeGenerator = Generators.timeBasedGenerator();
+
+        this.pooledBlockingGenerator = new PooledUUIDBlockingGenerator();
+        this.pooledLiveGenerator = new PooledUUIDLiveGenerator();
+    }
+
+    @TearDown(Level.Trial)
+    public void tearDown() throws Exception {
+        this.pooledBlockingGenerator.close();
+        this.pooledLiveGenerator.close();
     }
 
     @Benchmark
-    public UUID testTimedUUID() {
+    public UUID testTimeBasedUUID() {
         return timeGenerator.generate();
     }
 
     @Benchmark
-    public UUID testRandomUUID() {
-        return randomGenerator.generate();
+    public UUID testRandomBased1UUID() {
+        return randomGenerator1.generate();
+    }
+
+    @Benchmark
+    public UUID testRandomBased2UUID() {
+        return randomGenerator2.generate();
+    }
+
+    @Benchmark
+    public UUID testBlockingPooledUUID() {
+        return pooledBlockingGenerator.generate();
+    }
+
+    @Benchmark
+    public UUID testLivePooledUUID() {
+        return pooledLiveGenerator.generate();
     }
 
     @Benchmark
@@ -53,7 +96,7 @@ public class UUIDBenchmark {
         // this runner and options are for debug purpose only
         Options opt = new OptionsBuilder()
                 .include(UUIDBenchmark.class.getSimpleName())
-                .forks(0)
+                .forks(1)
                 .threads(64)
                 .mode(Mode.Throughput)
                 .warmupIterations(1)
