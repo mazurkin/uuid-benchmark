@@ -36,8 +36,10 @@ public class PooledUUIDBlockingGenerator extends NoArgGenerator implements AutoC
 
     @Override
     public void close() throws Exception {
-        this.thread.interrupt();
-        this.thread.join(1000);
+        if (this.thread.isAlive()) {
+            this.thread.interrupt();
+            this.thread.join(1000);
+        }
     }
 
     @Override
@@ -59,14 +61,11 @@ public class PooledUUIDBlockingGenerator extends NoArgGenerator implements AutoC
 
     @Override
     public UUID generate() {
-        try {
-            if (thread.isAlive()) {
-                return queue.take();
-            } else {
-                return fallback();
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+        final UUID v = queue.poll();
+
+        if (v != null) {
+            return v;
+        } else {
             return fallback();
         }
     }

@@ -40,8 +40,10 @@ public class PooledUUIDLiveGenerator extends NoArgGenerator implements AutoClose
 
     @Override
     public void close() throws Exception {
-        this.thread.interrupt();
-        this.thread.join(1000);
+        if (this.thread.isAlive()) {
+            this.thread.interrupt();
+            this.thread.join(1000);
+        }
     }
 
     @Override
@@ -69,12 +71,7 @@ public class PooledUUIDLiveGenerator extends NoArgGenerator implements AutoClose
 
     @Override
     public UUID generate() {
-        UUID v;
-
-        // live loop until we get some UUID or thread is dead
-        do {
-            v = queue.poll();
-        } while (v == null && thread.isAlive());
+        final UUID v = queue.poll();
 
         if (v != null) {
             counter.decrementAndGet();
