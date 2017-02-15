@@ -44,6 +44,8 @@ public class PooledUUIDLiveGenerator extends NoArgGenerator implements AutoClose
             this.thread.interrupt();
             this.thread.join(1000);
         }
+
+        this.queue.clear();
     }
 
     @Override
@@ -82,7 +84,7 @@ public class PooledUUIDLiveGenerator extends NoArgGenerator implements AutoClose
     }
 
     private UUID fallback() {
-        System.err.printf("FALLBACK to the delegate");
+        // System.err.printf("FALLBACK to the delegate");
         return delegate.generate();
     }
 

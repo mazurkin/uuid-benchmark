@@ -40,6 +40,8 @@ public class PooledUUIDBlockingGenerator extends NoArgGenerator implements AutoC
             this.thread.interrupt();
             this.thread.join(1000);
         }
+
+        this.queue.clear();
     }
 
     @Override
@@ -71,7 +73,7 @@ public class PooledUUIDBlockingGenerator extends NoArgGenerator implements AutoC
     }
 
     private UUID fallback() {
-        System.err.printf("FALLBACK to the delegate");
+        // System.err.printf("FALLBACK to the delegate");
         return delegate.generate();
     }
 }
