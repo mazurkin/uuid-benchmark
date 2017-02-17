@@ -32,6 +32,8 @@ public class UUIDBenchmark {
 
     private NoArgGenerator randomGenerator2;
 
+    private ThreadLocal<NoArgGenerator> randomGenerator3;
+
     private NoArgGenerator timeGenerator;
 
     private PooledUUIDBlockingGenerator pooledBlockingGenerator;
@@ -49,6 +51,10 @@ public class UUIDBenchmark {
         this.randomGenerator1 = Generators.randomBasedGenerator();
         // shared java.util.Random is used
         this.randomGenerator2 = Generators.randomBasedGenerator(new Random());
+        // local thread
+        this.randomGenerator3 = ThreadLocal.withInitial(
+                () -> Generators.randomBasedGenerator(new Random())
+        );
 
         this.timeGenerator = Generators.timeBasedGenerator();
 
@@ -78,14 +84,19 @@ public class UUIDBenchmark {
     }
 
     @Benchmark
+    public UUID testRandomBased3UUID() {
+        return randomGenerator3.get().generate();
+    }
+
+    @Benchmark
     public UUID testBlockingPooledUUID() {
         return pooledBlockingGenerator.generate();
     }
 
-//    @Benchmark
-//    public UUID testLivePooledUUID() {
-//        return pooledLiveGenerator.generate();
-//    }
+    @Benchmark
+    public UUID testLivePooledUUID() {
+        return pooledLiveGenerator.generate();
+    }
 
     @Benchmark
     public UUID testJavaUtilUUID() {
