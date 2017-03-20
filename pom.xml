@@ -34,7 +34,7 @@ THE POSSIBILITY OF SUCH DAMAGE.
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>org.test</groupId>
-    <artifactId>uuid-test</artifactId>
+    <artifactId>uuid-benchmark</artifactId>
     <version>1.0</version>
     <packaging>jar</packaging>
 
